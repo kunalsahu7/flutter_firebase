@@ -31,9 +31,7 @@ class _SignInScreenState extends State<SignInScreen> {
               Container(
                 height: 200,
                 child: Stack(
-                  children: <Widget>[
-
-                  ],
+                  children: <Widget>[],
                 ),
               ),
               Padding(
@@ -79,7 +77,9 @@ class _SignInScreenState extends State<SignInScreen> {
                               decoration: InputDecoration(
                                 border: InputBorder.none,
                                 hintText: "Email",
-                                hintStyle: TextStyle(fontWeight: FontWeight.bold,color: Colors.grey),
+                                hintStyle: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey),
                               ),
                             ),
                           ),
@@ -91,7 +91,9 @@ class _SignInScreenState extends State<SignInScreen> {
                               decoration: InputDecoration(
                                 border: InputBorder.none,
                                 hintText: "Password",
-                                hintStyle: TextStyle(fontWeight: FontWeight.bold,color: Colors.grey),
+                                hintStyle: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey),
                               ),
                             ),
                           ),
@@ -106,16 +108,19 @@ class _SignInScreenState extends State<SignInScreen> {
               ),
               InkWell(
                 onTap: () async {
-                  String? msg = await FirebaseHelper.firebaseHelper
-                      .SingIn(email: txtemail.text, password: txtpassword.text);
-                  Get.snackbar("$msg", "Login SuccessFully.");
+                  String? msg = await FirebaseHelper.firebaseHelper.SingIn(
+                    email: txtemail.text,
+                    password: txtpassword.text,
+                  );
+
                   if (msg == "success") {
+                    Get.snackbar("$msg", "Login SuccessFully.");
                     Get.offAndToNamed("/Home");
                   }
-                  Text("Error");
+                  Get.snackbar("$msg", "Login UnSuccessFully.");
                 },
                 child: Container(
-                  height:50,
+                  height: 50,
                   margin: EdgeInsets.symmetric(horizontal: 60),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(50),
@@ -150,12 +155,13 @@ class _SignInScreenState extends State<SignInScreen> {
                 child: Container(
                   child: TextButton(
                     onPressed: () async {
-                      String msg = await FirebaseHelper.firebaseHelper.signInWithGoogle();
-                      if(msg == "Success")
-                        {
-                          Get.offAndToNamed('/Home');
-                        }
-                    },child: Text("Google"),
+                      String msg = await FirebaseHelper.firebaseHelper
+                          .signInWithGoogle();
+                      if (msg == "Success") {
+                        Get.offAndToNamed('/Home');
+                      }
+                    },
+                    child: Text("Google"),
                     style: TextButton.styleFrom(backgroundColor: Colors.red),
                   ),
                 ),

@@ -21,19 +21,15 @@ class FirebaseHelper {
     return msg;
   }
 
-  String? SingIn({required email, required password}) {
-    String? msg;
-    firebaseAuth
+  Future<String> SingIn({required email, required password}) async {
+    return await firebaseAuth
         .signInWithEmailAndPassword(email: email, password: password)
         .then((value) {
       print("succes Login");
-      msg = "sucees";
+      return "success";
     }).catchError((e) {
-      print("$e");
-      msg = ("$e");
+      return "failed";
     });
-
-    return msg;
   }
 
   Future<String> checkLogin() async {
@@ -48,12 +44,10 @@ class FirebaseHelper {
 
   Future<String> signInWithGoogle() async {
     String? msg;
-    // Trigger the authentication flow
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
-    // Obtain the auth details from the request
     final GoogleSignInAuthentication? googleAuth =
-    await googleUser?.authentication;
+        await googleUser?.authentication;
 
     // Create a new credential
     final credential = GoogleAuthProvider.credential(
@@ -81,6 +75,7 @@ class FirebaseHelper {
     String? warranty,
     String? paytypes,
     String? modelno,
+    image,
   }) async {
     await firestore.collection("product").add({
       "name": name,
@@ -90,10 +85,41 @@ class FirebaseHelper {
       "warranty": warranty,
       "paytypes": paytypes,
       "modelno": modelno,
+      "image":image
     });
   }
 
   Stream<QuerySnapshot<Map<String, dynamic>>> readdata() {
     return firestore.collection("product").snapshots();
+  }
+
+  void UpdateData({
+    String? key,
+   required String? name,
+    required String? notes,
+    required String? price,
+    required String? review,
+    required String? warranty,
+    required String? paytypes,
+    required String? modelno,
+    required image,
+  }) {
+
+    print(key);
+    firestore.collection("product").doc("$key").set({
+      "name": name,
+      "notes": notes,
+      "price":price,
+      "review": review,
+      "warranty": warranty,
+      "paytypes": paytypes,
+      "modelno": modelno,
+      "image":image
+    },);
+  }
+
+  Future<void> deletdata({required key})
+  async {
+    return await firestore.collection("product").doc(key).delete();
   }
 }

@@ -1,5 +1,16 @@
 class HomeModel {
-  String? name, price, notes, date, time, review, warranty, paytypes, modelno, key;
+  String? name,
+      price,
+      notes,
+      date,
+      time,
+      review,
+  image,
+      warranty,
+      paytypes,
+      modelno,
+      key;
+  int? chekupadtedata;
 
   HomeModel({
     this.name,
@@ -8,9 +19,11 @@ class HomeModel {
     this.date,
     this.time,
     this.review,
+    this.image,
     this.warranty,
     this.paytypes,
     this.modelno,
-    this.key
+    this.key,
+    this.chekupadtedata,
   });
 }

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase/screens/Home/Controllor/HomeControllor.dart';
 import 'package:flutter_firebase/screens/Home/Model/HomeModel.dart';
 import 'package:flutter_firebase/utils/Firebasepage.dart';
 import 'package:get/get.dart';
@@ -12,22 +13,27 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  HomeControllor homeControllor = Get.put(HomeControllor());
+
+  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(
-          title: Text("FireBase"),
-          actions: [
-            ElevatedButton(
-              child: Icon(Icons.login_outlined),
-              onPressed: () {
-                FirebaseHelper.firebaseHelper.signOut();
-                Get.offAndToNamed('/SignIn');
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
-            ),
-          ],
+        key: _scaffoldKey,
+        // appBar: AppBar(
+        //   backgroundColor: Colors.white,
+        //   // leading: InkWell(onTap: () {
+        //   //
+        //   // }, child: Icon(Icons.menu,color: Colors.black,)),
+        // ),
+        drawer: Drawer(
+          child: Column(
+            children: [],
+          ),
+          width: 250,
+          backgroundColor: Colors.white,
         ),
         body: StreamBuilder(
           stream: FirebaseHelper.firebaseHelper.readdata(),
@@ -35,12 +41,11 @@ class _HomeScreenState extends State<HomeScreen> {
             if (snapshot.hasError) {
               return Text("${snapshot.error}");
             } else if (snapshot.hasData) {
-              List<HomeModel> DataList = [];
+              homeControllor.DataList.clear();
+
               QuerySnapshot? snapdata = snapshot.data;
               for (var x in snapdata!.docs) {
-
                 x.id;
-
 
                 Map data = x.data() as Map;
                 String? name = data['name'];
@@ -52,58 +57,145 @@ class _HomeScreenState extends State<HomeScreen> {
                 String? warranty = data['warranty'];
                 String? paytypes = data['paytypes'];
                 String? modelno = data['modelno'];
+                String? image = data['image'];
+                var key = x.id;
 
                 HomeModel homeModel = HomeModel(
-                  date: date,
                   modelno: modelno,
                   name: name,
                   notes: notes,
                   paytypes: paytypes,
                   price: price,
                   review: review,
-                  time: time,
                   warranty: warranty,
-                  key: x.id,
+                  image: image,
+                  key: key,
                 );
 
-                DataList.add(homeModel);
+                homeControllor.DataList.add(homeModel);
               }
 
-              return ListView.builder(
-                itemCount: DataList.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: [
-                        GestureDetector(
-                          onLongPress: () {
-                          },
-                          child: Container(
-                            height: 100,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Colors.brown.shade200
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Container(
+                      height: 50,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.white70,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(5),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            IconButton(
+                                onPressed: () {
+                                  _scaffoldKey.currentState!.openDrawer();
+                                },
+                                icon: Icon(Icons.menu)),
+                            Expanded(
+                              child: Text("Serch Produc",
+                                  style: TextStyle(color: Colors.black54)),
                             ),
-                            child: Column(
-                              children: [
-                                Text("${DataList[index].name}"),
-                                SizedBox(height: 5),
-                                Text("${DataList[index].price}"),
-                                SizedBox(height: 5),
-                                Text("${DataList[index].paytypes}"),
-                                SizedBox(height: 5),
-                                Text("${DataList[index].notes}"),
-                                SizedBox(height: 5),
-                              ],
-                            )
-                          ),
+                            IconButton(
+                                onPressed: () {}, icon: Icon(Icons.search)),
+                            IconButton(
+                                onPressed: () {
+                                  FirebaseHelper.firebaseHelper.signOut();
+                                  Get.offAndToNamed('/SignIn');
+                                },
+                                icon: Icon(Icons.logout)),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  );
-                },
+                    Expanded(
+                      child: GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          mainAxisExtent: 200,
+                            crossAxisCount: 2),
+                        itemCount: homeControllor.DataList.length,
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onDoubleTap: () {
+                              FirebaseHelper.firebaseHelper.deletdata(key: homeControllor.DataList[index].key);
+                            },
+                            onLongPress: () {
+                              print(homeControllor.DataList[index].key);
+                              HomeModel homemodal = HomeModel(
+                                key: homeControllor.DataList[index].key,
+                                name: homeControllor.DataList[index].name,
+                                warranty:
+                                    homeControllor.DataList[index].warranty,
+                                modelno: homeControllor.DataList[index].modelno,
+                                review: homeControllor.DataList[index].review,
+                                price: homeControllor.DataList[index].price,
+                                paytypes:
+                                    homeControllor.DataList[index].paytypes,
+                                notes: homeControllor.DataList[index].notes,
+                                image: homeControllor.DataList[index].image,
+                                chekupadtedata: 1,
+                              );
+                              Get.toNamed(
+                                '/Insert',
+                                arguments: homemodal,
+                              );
+                            },
+                            child: Container(
+                              height: 700,
+                              width: 800,
+                              margin: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    blurRadius: 5,
+                                    spreadRadius: 5,
+                                    color: Colors.black12,
+                                  ),
+                                ],
+                                color: Colors.white,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  children: [
+                                    Container(
+                                        child: Image.network(
+                                            "${homeControllor.DataList[index].image}"),height:100,width: 200,),
+                                    SizedBox(height: 20),
+                                    Align(
+                                      alignment: Alignment.bottomCenter,
+                                      child: Text(
+                                        "NAME :-${homeControllor.DataList[index].name}",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                    SizedBox(height: 5),
+                                    Align(
+                                      alignment: Alignment.bottomCenter,
+                                      child: Text(
+                                        "PRICE :-${homeControllor.DataList[index].price}",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                  ],
+                ),
               );
             }
             return CircularProgressIndicator();
@@ -111,7 +203,13 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            Get.toNamed('/Insert');
+            HomeModel homemodal = HomeModel(
+              chekupadtedata: 0,
+            );
+            Get.toNamed(
+              '/Insert',
+              arguments: homemodal,
+            );
           },
           child: Icon(Icons.add),
         ),
@@ -119,3 +217,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
+//  ElevatedButton(
+//               child: Icon(Icons.login_outlined),
+//               onPressed: () {
+//                 FirebaseHelper.firebaseHelper.signOut();
+//                 Get.offAndToNamed('/SignIn');
+//               },
+//               style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+//             ),
